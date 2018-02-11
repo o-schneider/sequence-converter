@@ -1,0 +1,7 @@
+.stack-work/
+out
+sequence-converter.cabal
+*~
+/*.fasta
+.idea
+*.iml
