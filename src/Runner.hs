@@ -2,7 +2,7 @@ module Runner
   ( run
   ) where
 
-import           Control.Monad    (forM_)
+import           Control.Monad    (forM)
 import           Data.List
 import           Sequence
 import           System.Directory
@@ -14,15 +14,16 @@ run directory = do
   files <- listDirectory directory
   let filesToConvert = map (\x -> directory ++ "/" ++ x) $ filter (isSuffixOf ".fasta") files
   print $ "Found " ++ show (length filesToConvert) ++ " sequence files in " ++ directory
-  forM_ filesToConvert updateFile
+  res <- forM filesToConvert updateFile
+  print $ "Number of converted sequences : " ++ show (sum res)
   return ()
 
-updateFile :: FilePath -> IO ()
+updateFile :: FilePath -> IO Int
 updateFile filePath = do
   print $ "Updating file " ++ filePath
   withFile filePath ReadWriteMode (updateFileContent filePath)
 
-updateFileContent :: FilePath -> Handle -> IO ()
+updateFileContent :: FilePath -> Handle -> IO Int
 updateFileContent filePath h = do
   hSetNewlineMode h universalNewlineMode
   contents <- hGetContents h
@@ -32,4 +33,4 @@ updateFileContent filePath h = do
   let newFileName = filePath ++ ".converted"
   writeFile newFileName newContent
   print $ filePath ++ " converted in " ++ newFileName
-  return ()
+  return (length sequences)
